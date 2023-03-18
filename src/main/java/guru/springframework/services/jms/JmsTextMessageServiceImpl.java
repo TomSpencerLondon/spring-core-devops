@@ -1,9 +1,9 @@
 package guru.springframework.services.jms;
 
 import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Service;
-
 import javax.jms.Queue;
 
 /**

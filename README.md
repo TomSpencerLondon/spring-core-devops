@@ -116,3 +116,6 @@ public class DataSourceTest {
 
 ```
 
+### Setting the active profile at runtime
+Spring offers a number of ways to set the active profile at runtime. 
+
