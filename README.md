@@ -75,3 +75,44 @@ Spring Boot uses a very particular PropertySource order that is designed to allo
 We can use Spring Profiles to load the appropriate data source. If the bean does not have an active profile it is brought in.
 Beans with a dev profile will get ignored in production.
 
+```java
+public interface FakeDataSource {
+    String getConnectionInfo();
+}
+
+```
+
+We then have different profiles for each source:
+```java
+@Component
+@Profile("dev")
+public class DevDataSource implements FakeDataSource{
+    @Override
+    public String getConnectionInfo() {
+        return "I'm dev data source";
+    }
+}
+```
+
+We can then use one of those profiles in our test:
+```java
+
+@ExtendWith(SpringExtension.class)
+@ContextConfiguration(classes = DataSourceConfig.class)
+@ActiveProfiles("dev")
+public class DataSourceTest {
+    private FakeDataSource fakeDataSource;
+    
+    @Autowired
+    public void setFakeDataSource(FakeDataSource fakeDataSource) {
+        this.fakeDataSource = fakeDataSource;
+    }
+
+    @Test
+    void testDataSource() {
+        System.out.println(fakeDataSource.toString());
+    }
+}
+
+```
+
