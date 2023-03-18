@@ -50,3 +50,5 @@ guru.jms.port=3330
 guru.jms.user=Ron
 guru.jms.password=Burgundy
 ```
+The properties can be overridden by environment variables.
+
