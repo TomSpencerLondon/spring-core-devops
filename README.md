@@ -178,7 +178,34 @@ Mysql Workbench connection issues on linux. On a terminal window, run the follow
 # snap connect mysql-workbench-community:password-manager-service 
 # snap connect mysql-workbench-community:ssh-keys
 ```
-
+### Entity diagram of database
 ![springguru](https://user-images.githubusercontent.com/27693622/226150009-807edbc2-d297-4dc6-a299-3dd637888147.png)
 
 
+### Creating a service account
+We will create a user with restricted access. No create tables or moderate tables. This is standard practice in enterprise
+applications.
+
+```sql
+CREATE USER 'springframework'@'localhost' IDENTIFIED BY 'guru';
+
+GRANT SELECT ON springguru.* to 'springframework'@'localhost';
+GRANT INSERT ON springguru.* to 'springframework'@'localhost';
+GRANT DELETE ON springguru.* to 'springframework'@'localhost';
+GRANT UPDATE ON springguru.* to 'springframework'@'localhost';
+
+```
+
+If we check in MySQL Workbench we see that our new user has limited privileges:
+
+![image](https://user-images.githubusercontent.com/27693622/226191730-242a9258-d00c-4d9f-bc6b-8d2482033655.png)
+
+We can then add this user for testing with the qa profile:
+```sql
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQL8Dialect
+spring.datasource.url=jdbc:mysql://localhost:3306/springguru
+spring.datasource.username=springframework
+spring.datasource.password=guru
+spring.jpa.hibernate.ddl-auto=update
+```
