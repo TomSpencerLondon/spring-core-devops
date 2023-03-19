@@ -119,3 +119,66 @@ public class DataSourceTest {
 ### Setting the active profile at runtime
 Spring offers a number of ways to set the active profile at runtime. 
 
+### Using Databases
+We are going to use AWS RDS for our production environment. We will have h2 for dev.
+MySQL local for QA and in production we will use AWS. We will use a separate jar for our pom for mysql data source:
+```xml
+
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+```
+Here we have added h2 for dev and the mysql connector jar. Set up mysql locally and check the connection:
+```bash
+tom@tom-ubuntu:~/.m2/repository/org$ sudo mysql -u root
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 9
+Server version: 8.0.32-0ubuntu0.22.10.2 (Ubuntu)
+
+Copyright (c) 2000, 2023, Oracle and/or its affiliates.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+mysql> create database springguru
+    -> ;
+Query OK, 1 row affected (0.01 sec)
+
+mysql> 
+
+```
+Here we are using the root user. We then set the properties for our QA environment:
+```properties
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQL8Dialect
+spring.datasource.url=jdbc:mysql://localhost:3306/springguru
+spring.datasource.username=root
+spring.datasource.password=
+spring.jpa.hibernate.ddl-auto=update
+```
+We then set the active profile to qa. You may need to change the permissions for connecting to mysql:
+```bash
+mysql > ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '';
+mysql > FLUSH PRIVILEGES;
+```
+
+Mysql Workbench connection issues on linux. On a terminal window, run the following commands:
+```bash
+# snap connect mysql-workbench-community:password-manager-service 
+# snap connect mysql-workbench-community:ssh-keys
+```
+
+![springguru](https://user-images.githubusercontent.com/27693622/226150009-807edbc2-d297-4dc6-a299-3dd637888147.png)
+
+
