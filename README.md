@@ -201,11 +201,37 @@ If we check in MySQL Workbench we see that our new user has limited privileges:
 ![image](https://user-images.githubusercontent.com/27693622/226191730-242a9258-d00c-4d9f-bc6b-8d2482033655.png)
 
 We can then add this user for testing with the qa profile:
-```sql
+```properties
 spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
 spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQL8Dialect
 spring.datasource.url=jdbc:mysql://localhost:3306/springguru
 spring.datasource.username=springframework
 spring.datasource.password=guru
 spring.jpa.hibernate.ddl-auto=update
+```
+It is now best practice to use a service account with restricted privileges.
+
+### Encrypting Properties
+We can use Jasypt for encryption of the database password:
+```xml
+		<dependency>
+			<groupId>com.github.ulisesbocchio</groupId>
+			<artifactId>jasypt-spring-boot-starter</artifactId>
+			<version>3.0.5</version>
+		</dependency>
+```
+
+We can then encrypt the username and password:
+```bash
+ ./encrypt.sh input=springframework password=password
+```
+
+And use the encrypted username and password in our config file:
+```java
+@Configuration
+@EncryptablePropertySource(name = "qaEncryptedProperties", value = "classpath:qa.encrypted.properties")
+@Profile("qa")
+public class QaEncryptedConfig {
+}
+
 ```
