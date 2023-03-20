@@ -226,12 +226,15 @@ We can then encrypt the username and password:
  ./encrypt.sh input=springframework password=password
 ```
 
-And use the encrypted username and password in our config file:
-```java
-@Configuration
-@EncryptablePropertySource(name = "qaEncryptedProperties", value = "classpath:qa.encrypted.properties")
-@Profile("qa")
-public class QaEncryptedConfig {
-}
-
+We then add the encrypted username and password to the application.properties:
+```properties
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQL8Dialect
+spring.datasource.url=jdbc:mysql://localhost:3306/springguru
+jasypt.encryptor.password=password
+jasypt.encryptor.iv-generator-classname=org.jasypt.iv.NoIvGenerator
+jasypt.encryptor.algorithm=PBEWithMD5AndTripleDES
+spring.datasource.username=ENC(3ZeqNvW+Rm0DgOkkVVXgPBxIEeyXsKQ6)
+spring.datasource.password=ENC(1qHrTuI0RB4Qzl3zPE3FmQ==)
+spring.jpa.hibernate.ddl-auto=update
 ```
