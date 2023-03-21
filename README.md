@@ -534,5 +534,117 @@ iptables -A INPUT -p tcp --dport 8080 -j DROP
 ```
 Now we can't access http://jenkins.drspencer.io:8080 from the browser. We can only access http://jenkins.drspencer.io
 
+### Creating ssh keys
+
+When we are working with github and jenkins we can use a username and password for checking into git. This is not security
+best practice. A great way to enable communication between github is to use ssh keys. Ssh is a great way to enable encrypted
+communication between two servers and also to avoid sharing secrets. We are now going to create an ssh key from the linux
+command line. We are currently under the username root:
+```bash
+[root@ip-172-31-63-3 sysconfig]# su jenkins
+[root@ip-172-31-63-3 sysconfig]# whoami
+root
+[root@ip-172-31-63-3 sysconfig]# ps -ef | grep jenkins
+jenkins    25804       1  0 10:18 ?        00:01:47 /usr/bin/java -Djava.awt.headless=true -jar /usr/share/java/jenkins.war --webroot=/var/cache/jenkins/war --httpPort=8080
+root       56019   20524  0 20:30 pts/0    00:00:00 grep --color=auto jenkins
+
+```
+Jenkins has non user account so we need to run the bash shell as jenkins:
+```bash
+[root@ip-172-31-63-3 sysconfig]# su -s /bin/bash jenkins
+bash-5.2$ whoami
+jenkins
+bash-5.2$ 
+```
+
+We now go into the jenkins folder on our linux instance:
+```bash
+bash-5.2$ ls
+acpid	 console       i18n	   man-db	    nftables.conf  selinux
+atd	 cpupower      irqbalance  modules	    rngd	   sshd
+chronyd  firewalld     jenkins	   network	    rpcbind	   sysstat
+clock	 htcacheclean  keyboard    network-scripts  run-parts	   sysstat.ioconf
+bash-5.2$ cd
+bash-5.2$ ls
+config.xml					nodeMonitors.xml
+hudson.model.UpdateCenter.xml			nodes
+hudson.plugins.git.GitTool.xml			plugins
+identity.key.enc				queue.xml.bak
+jenkins.install.InstallUtil.lastExecVersion	secret.key
+jenkins.install.UpgradeWizard.state		secret.key.not-so-secret
+jenkins.model.JenkinsLocationConfiguration.xml	secrets
+jenkins.telemetry.Correlator.xml		updates
+jobs						userContent
+logs						users
+bash-5.2$ pwd
+/var/lib/jenkins
+bash-5.2$ 
+```
+We create an .ssh folder:
+```bash
+bash-5.2$ mkdir .ssh
+bash-5.2$ cd .ssh/
+bash-5.2$ pwd
+/var/lib/jenkins/.ssh
+bash-5.2$ 
+```
+We now want to generate an ssh key:
+```bash
+bash-5.2$ ssh-keygen -t rsa -C 'jenkins@example.com'
+Generating public/private rsa key pair.
+Enter file in which to save the key (/var/lib/jenkins/.ssh/id_rsa): 
+Enter passphrase (empty for no passphrase): 
+Enter same passphrase again: 
+Your identification has been saved in /var/lib/jenkins/.ssh/id_rsa
+Your public key has been saved in /var/lib/jenkins/.ssh/id_rsa.pub
+The key fingerprint is:
+SHA256:3cre8EzGxywgkHxfchhxxceb0YEj5S6eRz4zAEan2Bs jenkins@example.com
+The key's randomart image is:
++---[RSA 3072]----+
+|         .ooo+ooo|
+|     . .+ o=.o..+|
+|      +..Eo +...+|
+|       o.o+=.  o |
+|        S.+o.o   |
+|         o.+*o   |
+|          +o=*+  |
+|         . B.o+  |
+|          . +    |
++----[SHA256]-----+
+
+```
+
+We add the public key to github:
+![image](https://user-images.githubusercontent.com/27693622/226736467-ba252008-a6db-4407-8855-ed6782240707.png)
+
+We now need to install git on our linux instance:
+```bash
+> sudo yum install git
+> git --version
+git version 2.39.2
+```
+
+We are now going to setup the credentials in jenkins to use them for builds.
+
+![image](https://user-images.githubusercontent.com/27693622/226741252-5312bdc4-4e19-4258-bfb1-7e35875abcfb.png)
+
+We also want to add maven to jenkins:
+![image](https://user-images.githubusercontent.com/27693622/226743299-d3f5b23a-efaf-43bc-99ad-a621e1743761.png)
+
+### Build configuration
+We are now going to create a build configuration in jenkins. We are now going to set up the build and get things cooking
+in jenkins.
+
+![image](https://user-images.githubusercontent.com/27693622/226744537-8cb8e0b2-8d7b-4006-be38-65d630dcec7d.png)
+
+We also have to add our private key to the jenkins build configuration and a git webhook:
+
+![image](https://user-images.githubusercontent.com/27693622/226747793-afd920cc-f8ea-44c6-8abb-3ee2ca2a1999.png)
+
+![image](https://user-images.githubusercontent.com/27693622/226748751-cf554bc8-159a-4dc0-a905-36ac7fbb1ff8.png)
+
+and set up the build:
+![image](https://user-images.githubusercontent.com/27693622/226749135-7e4aaa8a-4c48-4f8a-9909-71f0daaf6bd9.png)
+
 
 
