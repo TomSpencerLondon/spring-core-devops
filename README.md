@@ -395,4 +395,12 @@ Address: 18.67.76.113
 
 How DNS works:
 
+![image](https://user-images.githubusercontent.com/27693622/226501471-b389a40d-ae08-4d40-9a99-880835ed1691.png)
+
+When your computer boots up it asks for an IP address. This is where it looks names up from. When we request 
+springframework.guru it works with top level domain. This request goes to find the dns server registered with the Internet
+Server Provider. The route then goes to dns record sets which are then returned to your local machine. Cname records take
+a url and convert it to springframework.guru. The DNS record then responds back with the IP address so that the computer
+can find the server by the IP address.
+
 
