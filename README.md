@@ -401,6 +401,99 @@ When your computer boots up it asks for an IP address. This is where it looks na
 springframework.guru it works with top level domain. This request goes to find the dns server registered with the Internet
 Server Provider. The route then goes to dns record sets which are then returned to your local machine. Cname records take
 a url and convert it to springframework.guru. The DNS record then responds back with the IP address so that the computer
-can find the server by the IP address.
+can find the server by the IP address. It can take time for address changes to propagate through all the global DNS servers.
 
+### Using Route 53
+We are now going to set a domain and subdomain for our jenkins address using Route 53. We will point a subdomain at the ec2 instance
+ip address. Now when we go to http://jenkins.drspencer.io:8080/login?from=%2F we can see the login page for jenkins.
+Browsers run on port 80 but our jenkins server is running on 8080. We are overriding port 80 in the browser. 
+We now need to set up Apache to do port forwarding between 80 and 8080. Apache routes the war file running on 8080 to 80 so
+that we can view the application directly in the browser.
+
+```bash
+[ec2-user@ip-172-31-63-3 ~]$ sudo yum install httpd
+Last metadata expiration check: 1:42:53 ago on Tue Mar 21 00:26:29 2023.
+Dependencies resolved.
+===========================================================================================
+ Package                  Arch        Version                       Repository        Size
+===========================================================================================
+Installing:
+ httpd                    x86_64      2.4.55-1.amzn2023             amazonlinux       48 k
+Installing dependencies:
+ apr                      x86_64      1.7.2-2.amzn2023.0.2          amazonlinux      129 k
+ apr-util                 x86_64      1.6.3-1.amzn2023.0.1          amazonlinux       98 k
+ generic-logos-httpd      noarch      18.0.0-12.amzn2023.0.3        amazonlinux       19 k
+ httpd-core               x86_64      2.4.55-1.amzn2023             amazonlinux      1.4 M
+ httpd-filesystem         noarch      2.4.55-1.amzn2023             amazonlinux       15 k
+ httpd-tools              x86_64      2.4.55-1.amzn2023             amazonlinux       82 k
+ mailcap                  noarch      2.1.49-3.amzn2023.0.3         amazonlinux       33 k
+Installing weak dependencies:
+ apr-util-openssl         x86_64      1.6.3-1.amzn2023.0.1          amazonlinux       17 k
+ mod_http2                x86_64      2.0.11-2.amzn2023             amazonlinux      150 k
+ mod_lua                  x86_64      2.4.55-1.amzn2023             amazonlinux       62 k
+
+Transaction Summary
+===========================================================================================
+Install  11 Packages
+
+Total download size: 2.0 M
+Installed size: 6.1 M
+Is this ok [y/N]: y
+
+[ec2-user@ip-172-31-63-3 ~]$ sudo service httpd start
+Redirecting to /bin/systemctl start httpd.service
+```
+We now have apache up and running:
+![image](https://user-images.githubusercontent.com/27693622/226503394-8f1e9c60-725c-447d-a093-81e80b777e49.png)
+
+but we are not redirecting to jenkins yet. We need to go to configure the apache daemon:
+
+```bash
+[ec2-user@ip-172-31-63-3 ~]$ sudo service httpd start
+Redirecting to /bin/systemctl start httpd.service
+[ec2-user@ip-172-31-63-3 ~]$ cd /etc/httpd/conf
+[ec2-user@ip-172-31-63-3 conf]$ ls
+httpd.conf  magic
+```
+We now add our jenkins setup in the apache httpd.conf file:
+```bash
+# Jenkins setup
+<VirtualHost *:80>
+    ServerName jenkins.drspencer.io
+    ProxyRequests Off
+    ProxyPreserveHost On
+    AllowEncodedSlashes NoDecode
+    ProxyPass / http://localhost:8080/ nocanon
+    ProxyPassReverse / http://localhost:8080/
+    ProxyPassReverse / http://jenkins.drspencer.io
+    <Proxy http://localhost:8080/* >
+        Order deny,allow
+        Allow from all
+    </Proxy>
+</VirtualHost>
+```
+This sets up a proxy for the server and reverses traffic from 8080. We now do an apache restart:
+```bash
+[ec2-user@ip-172-31-63-3 conf]$ service httpd restart
+Redirecting to /bin/systemctl restart httpd.service
+Failed to restart httpd.service: Access denied
+See system logs and 'systemctl status httpd.service' for details.
+[ec2-user@ip-172-31-63-3 conf]$ sudo service httpd restart
+Redirecting to /bin/systemctl restart httpd.service
+Job for httpd.service failed because the control process exited with error code.
+See "systemctl status httpd.service" and "journalctl -xeu httpd.service" for details.
+[ec2-user@ip-172-31-63-3 conf]$ setsebool -P httpd_can_network_connect true
+Cannot set persistent booleans, please try as root.
+[ec2-user@ip-172-31-63-3 conf]$ sudo setsebool -P httpd_can_network_connect true
+```
+Because we are running on a Security-Enhanced Linux machine we have to make SE-Linux allow restart.
+https://www.jenkins.io/doc/book/system-administration/reverse-proxy-configuration-with-jenkins/reverse-proxy-configuration-apache/#mod_proxy:~:text=If%20you%20are,P%20httpd_can_network_connect%20true
+Our configuration is trying to connect to the tomcat instance running on 8080 and the Security settings are not allowing us.
+This command allows apache to connect to the network:
+```bash
+setsebool -P httpd_can_network_connect true
+```
+We can now connect to jenkins via the domain jenkins.drspencer.io directly:
+
+![image](https://user-images.githubusercontent.com/27693622/226509814-b0e73eb9-1b12-49d4-8881-3142465665d9.png)
 
