@@ -364,8 +364,6 @@ We now have a jenkins server for configuring builds:
 
 ```bash
 [ec2-user@ip-172-31-63-3 ~]$ nslookup springframework.guru
-Server:		172.31.0.2
-Address:	172.31.0.2#53
 
 Non-authoritative answer:
 Name:	springframework.guru
@@ -382,8 +380,6 @@ Address: 2606:4700:3108::ac42:2b38
 This is the result for my own dns on route 53:
 ```bash
 [ec2-user@ip-172-31-63-3 ~]$ nslookup drspencer.io
-Server:		172.31.0.2
-Address:	172.31.0.2#53
 
 Non-authoritative answer:
 Name:	drspencer.io
