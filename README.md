@@ -497,3 +497,42 @@ We can now connect to jenkins via the domain jenkins.drspencer.io directly:
 
 ![image](https://user-images.githubusercontent.com/27693622/226509814-b0e73eb9-1b12-49d4-8881-3142465665d9.png)
 
+We can now block port 8080. We go to the jenkins file in /etc/sysconfig and open jenkins with vim.
+We then use cntrl f to page down and add a Jenkins listen address:
+```bash
+JENKINS_PORT="8080"
+
+## Type:        string
+## Default:     ""
+## ServiceRestart: jenkins
+#
+# IP address Jenkins listens on for HTTP requests.
+# Default is all interfaces (0.0.0.0).
+#
+JENKINS_LISTEN_ADDRESS="127.0.0.1"
+
+```
+This blocks jenkins listening to the world on port 8080.
+We then restart jenkins:
+```bash
+[root@ip-172-31-63-3 sysconfig]# service jenkins restart
+Restarting jenkins (via systemctl):                        [  OK  ]
+```
+and check for the jenkins port run information:
+```bash
+[root@ip-172-31-63-3 sysconfig]# ps -f | grep jenkins
+root       20945   20524  0 09:17 pts/0    00:00:00 grep --color=auto jenkins
+```
+Jenkins is now running on jenkins, its own user account.
+This is a good security set up so it is locked to the outside world.
+Jenkins is available on port 80 but no longer 8080.
+
+This is not quite enough on aws linux. I had to add iptables to block all non-local access to port 8080:
+```bash
+iptables -A INPUT -p tcp --dport 8080 -s localhost -j ACCEPT
+iptables -A INPUT -p tcp --dport 8080 -j DROP
+```
+Now we can't access http://jenkins.drspencer.io:8080 from the browser. We can only access http://jenkins.drspencer.io
+
+
+
