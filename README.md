@@ -238,3 +238,165 @@ spring.datasource.username=ENC(3ZeqNvW+Rm0DgOkkVVXgPBxIEeyXsKQ6)
 spring.datasource.password=ENC(1qHrTuI0RB4Qzl3zPE3FmQ==)
 spring.jpa.hibernate.ddl-auto=update
 ```
+
+### Continuous Integration
+We are now going to provision services in the cloud such as jenkins and a dns for the 
+jenkins instance. We will also set up Artifactory with docker so that we can deploy jenkins builds
+to deploy maven artifacts to the Artifactory repository.
+
+### Introduction to AWS
+We will now look in more detail at Amazon Web Services. AWS cloud compute was created because they were not using
+servers during the year. This business has now grown to make them a true leader in the space. Companies like Netflix
+use AWS for deployments. It is an incredible collection of resources:
+
+![image](https://user-images.githubusercontent.com/27693622/226225255-34c043ff-efb3-4d24-8f18-d609762dc2ff.png)
+
+For our application we will use EC2 virtual servers in the cloud to provision a server in the cloud to run our jenkins instance.
+We will use Elastic Beanstalk for deploying our Tomcat instance. We will also use RDS to provision our mysql database managed
+by Amazon. Amazon will handle all backups and software upgrades on the database. This is useful for small startups who want to
+out source the management of their databases. We will also use Route 53 to host our domain and DNS. We will then point traffic
+at this domain.
+
+### Linux distributions
+We will use the Redhat flavour of linux. There are two branches: debian (ubuntu) and fedora. In enterprise applications
+Redhat or Fedora is frequently used. The fedora linuxes are mostly standard in enterprise applications. Most often Redhat
+enterprise linux is used.
+
+### Provisioning a server on AWS
+We will now go to the AWS console to set up an AMI to use jenkins.
+
+![image](https://user-images.githubusercontent.com/27693622/226227223-06c07c7a-1212-40ca-a9cd-b61fa90bfca8.png)
+
+I have set up a Redhat linux instance and added a security group with a port range inbound traffic on port 8080.
+We now install oracle jdk and set up jenkins. Our instance is a t2 micro and will reference the private IP address. We can
+also use ssh to connect to the instance.
+
+```bash
+tom@tom-ubuntu:~/Desktop$ chmod 400 springguru.pem
+tom@tom-ubuntu:~/Desktop$ ssh -i "springguru.pem" ec2-user@ec2-54-236-41-164.compute-1.amazonaws.com
+Register this system with Red Hat Insights: insights-client --register
+Create an account or view all your systems at https://red.ht/insights-dashboard
+[ec2-user@ip-172-31-52-103 ~]$ 
+```
+We are now inside the amazon instance. We will use wget to get the oracle instance of jdk.
+
+```bash
+> sudo su
+> yum install wget
+> wget https://corretto.aws/downloads/latest/amazon-corretto-11-x64-linux-jdk.tar.gz
+> tar xzf amazon-corretto-11-x64-linux-jdk.tar.gz
+> cp -r ./amazon-corretto-11.0.18.10.1-linux-x64/ /opt/
+> cd /opt
+> alternatives --install /usr/bin/java java /opt/amazon-corretto-11.0.18.10.1-linux-x64/bin/java 2
+> alternatives config java
+
+[root@ip-172-31-52-103 opt]# java -version
+openjdk version "11.0.18" 2023-01-17 LTS
+OpenJDK Runtime Environment Corretto-11.0.18.10.1 (build 11.0.18+10-LTS)
+OpenJDK 64-Bit Server VM Corretto-11.0.18.10.1 (build 11.0.18+10-LTS, mixed mode)
+
+> alternatives --install /usr/bin/jar jar /opt/amazon-corretto-11.0.18.10.1-linux-x64/bin/jar 2
+> alternatives --install /usr/bin/javac javac /opt/amazon-corretto-11.0.18.10.1-linux-x64/bin/javac 2
+> alternatives --set jar /opt/amazon-corretto-11.0.18.10.1-linux-x64/bin/jar
+> alternatives --set javac /opt/amazon-corretto-11.0.18.10.1-linux-x64/bin/javac
+```
+
+A new release is produced weekly to deliver bug fixes and features to users and plugin developers. It can be installed from the redhat yum repository.
+```bash
+
+sudo wget -O /etc/yum.repos.d/jenkins.repo \
+https://pkg.jenkins.io/redhat/jenkins.repo
+sudo rpm --import https://pkg.jenkins.io/redhat/jenkins.io.key
+sudo yum upgrade
+sudo yum install jenkins
+
+
+```
+
+# Add required dependencies for the jenkins package
+https://www.jenkins.io/doc/book/installing/linux/
+
+You can enable the Jenkins service to start at boot with the command:
+```bash
+sudo systemctl enable jenkins
+```
+You can start the Jenkins service with the command:
+```bash
+
+sudo systemctl start jenkins
+```
+You can check the status of the Jenkins service using the command:
+```bash
+
+sudo systemctl status jenkins
+```
+We have now installed jenkins-2 on our EC2 instance and wnat to start the service.
+```bash
+> service jenkins start
+> ps -ef | grep jenkins
+root       11000    1029  0 02:17 pts/0    00:00:00 grep --color=auto jenkins
+```
+This link is very good for setting up jenkins:
+https://www.jenkins.io/doc/tutorials/tutorial-for-installing-jenkins-on-AWS/
+
+We now get this page on http://ec2-100-26-253-161.compute-1.amazonaws.com:8080/login?from=%2F
+
+![image](https://user-images.githubusercontent.com/27693622/226494197-b5bdb0b4-baf0-494c-8eb3-7eb03e9cb4b0.png)
+
+We get the admin password by running:
+```bash
+[ec2-user ~]$ sudo cat /var/lib/jenkins/secrets/initialAdminPassword
+
+```
+
+We then install the suggested plugins and add our first user:
+
+![image](https://user-images.githubusercontent.com/27693622/226494602-26a30619-01de-4820-a8f7-ea8389c89d65.png)
+
+We now have a jenkins server for configuring builds:
+
+![image](https://user-images.githubusercontent.com/27693622/226494792-09b0b82f-e6cc-4d38-bd1a-8e0981650053.png)
+
+### How DNS works
+- stands for domain name services or domain name server
+- gets you an ip address associated with a human readable text address
+  - springframework.guru is IP address 172.66.43.56
+
+```bash
+[ec2-user@ip-172-31-63-3 ~]$ nslookup springframework.guru
+Server:		172.31.0.2
+Address:	172.31.0.2#53
+
+Non-authoritative answer:
+Name:	springframework.guru
+Address: 172.66.43.56
+Name:	springframework.guru
+Address: 172.66.40.200
+Name:	springframework.guru
+Address: 2606:4700:3108::ac42:28c8
+Name:	springframework.guru
+Address: 2606:4700:3108::ac42:2b38
+
+```
+
+This is the result for my own dns on route 53:
+```bash
+[ec2-user@ip-172-31-63-3 ~]$ nslookup drspencer.io
+Server:		172.31.0.2
+Address:	172.31.0.2#53
+
+Non-authoritative answer:
+Name:	drspencer.io
+Address: 18.67.76.121
+Name:	drspencer.io
+Address: 18.67.76.122
+Name:	drspencer.io
+Address: 18.67.76.43
+Name:	drspencer.io
+Address: 18.67.76.113
+
+```
+
+How DNS works:
+
+
