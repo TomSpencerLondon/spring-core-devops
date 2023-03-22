@@ -330,7 +330,7 @@ You can check the status of the Jenkins service using the command:
 
 sudo systemctl status jenkins
 ```
-We have now installed jenkins-2 on our EC2 instance and wnat to start the service.
+We have now installed jenkins-2 on our EC2 instance and start the service.
 ```bash
 > service jenkins start
 > ps -ef | grep jenkins
@@ -646,5 +646,7 @@ We also have to add our private key to the jenkins build configuration and a git
 and set up the build:
 ![image](https://user-images.githubusercontent.com/27693622/226749135-7e4aaa8a-4c48-4f8a-9909-71f0daaf6bd9.png)
 
+We can check console output:
+![image](https://user-images.githubusercontent.com/27693622/226906390-56a1d15e-0205-497c-8075-a1aad10bb5e3.png)
 
-
+Now we have running builds in jenkins. We can now test the change by pushing to github. 
