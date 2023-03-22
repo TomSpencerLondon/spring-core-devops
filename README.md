@@ -339,6 +339,14 @@ root       11000    1029  0 02:17 pts/0    00:00:00 grep --color=auto jenkins
 This link is very good for setting up jenkins:
 https://www.jenkins.io/doc/tutorials/tutorial-for-installing-jenkins-on-AWS/
 
+This link is useful for font errors with headless java:
+https://wiki.jenkins.io/display/JENKINS/Jenkins+got+java.awt.headless+problem
+
+In particular this command is useful for fonts:
+```bash
+sudo yum install xorg-x11-server-Xvfb
+```
+
 We now get this page on http://ec2-100-26-253-161.compute-1.amazonaws.com:8080/login?from=%2F
 
 ![image](https://user-images.githubusercontent.com/27693622/226494197-b5bdb0b4-baf0-494c-8eb3-7eb03e9cb4b0.png)
