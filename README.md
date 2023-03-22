@@ -658,4 +658,12 @@ We can check console output:
 ![image](https://user-images.githubusercontent.com/27693622/226906390-56a1d15e-0205-497c-8075-a1aad10bb5e3.png)
 
 Now we have running builds in jenkins. We can now test the change by pushing to github. 
+We can test this with:
+```bash
+git commit --allow-empty -m "Empty commit"
+```
+on our repository.
+
+![image](https://user-images.githubusercontent.com/27693622/226961267-a011fae1-81b1-4ff3-b27f-e38ad1998eb2.png)
+
 
