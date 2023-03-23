@@ -666,4 +666,92 @@ on our repository.
 
 ![image](https://user-images.githubusercontent.com/27693622/226961267-a011fae1-81b1-4ff3-b27f-e38ad1998eb2.png)
 
+### Artifactory
+We are now going to use Artifactory to store the jar builds. The advantage of Artifactory is that it is a private repository
+where we can save our images. We are going to deploy Artifactory in a docker container.
+We will create a new ec2 server on AWS and install docker.
+To get Docker running on the AWS AMI will follow the steps below (these are all assuming you have ssh'd on to the EC2 instance).
+1. Update the packages on our instance
 
+```bash 
+[ec2-user ~]$ sudo yum update -y
+```
+
+2. Install Docker
+
+```bash
+[ec2-user ~]$ sudo yum install docker -y
+```
+
+3. Start the Docker Service
+
+```bash
+[ec2-user ~]$ sudo service docker start
+```
+
+4. Add the ec2-user to the docker group so you can execute Docker commands without using sudo.
+
+```bash
+[ec2-user ~]$ sudo usermod -a -G docker ec2-user
+```
+
+### Containers
+- Have their own process space
+- Their own network interface
+- 'Run' processes as root (inside the container)
+- Have their own disk space
+  - (can share with host too)
+
+![image](https://user-images.githubusercontent.com/27693622/226969173-32fa0ed1-2318-4842-83a7-f27b3b1db0ae.png)
+
+Containers have no Guest operating system so we are running from the operating system of the original machine.
+Docker containers are upto 30% more efficient than virtual machines.
+
+### Docker terminology
+- Docker image - the representation of a docker container. Like a jar file in Java
+- Docker container - standard runtime of Docker. Effectively a deployed and running Docker Image.
+- Docker Engine - The code which manages Docker stuff. Creates and runs Docker Containers
+
+Here we see the way in which Docker is put together:
+
+![image](https://user-images.githubusercontent.com/27693622/226971788-a9e0ba92-9fb9-4e87-90ce-de1cce7e9ed5.png)
+
+We are going to install Artifactory using volumes so that we can persist the maven repository using Artifactory.
+This link was helpful:
+https://medium.com/@raguyazhin/step-by-step-guide-to-install-jfrog-artifactory-on-amazon-linux-6b832dd8097b
+and this one was excellent:
+https://www.coachdevops.com/search?q=docker+artifactory
+In particular, remember to allow ports 8081 and 8082 on your aws ec2 security group.
+
+### Resolving artifacts through Artifactory
+In maven 3.9 we need https for artifactory to include these in our maven pom.
+We first need to request an ssl certificate.
+We will follow the instructions here:
+https://levelup.gitconnected.com/adding-a-custom-domain-and-ssl-to-aws-ec2-a2eca296facd
+
+The SSL certificate does take a few minutes to create so we do need to be patient:
+![image](https://user-images.githubusercontent.com/27693622/227237035-38fae4f1-9902-4a79-b634-c41d6d4aef9c.png)
+
+Now the certificate is showing as issued:
+![image](https://user-images.githubusercontent.com/27693622/227237878-2550434c-adc0-4db5-9491-cc02f9d3c4bd.png)
+
+We can now create a target group. I have a few target groups already:
+![image](https://user-images.githubusercontent.com/27693622/227238416-7e8e9c24-9bf1-4b94-a3dc-0dd26005f036.png)
+
+We want to create one for our EC2 instance.
+We then register our instance to the target group:
+![image](https://user-images.githubusercontent.com/27693622/227239645-d8f0b141-26db-4975-8c01-9e45f0c710f2.png)
+
+Next we need to create an application load balancer. We will choose the application load balancer.
+We also need to set up a target group as described in the article above.
+I have set up https and a DNS for the artifactory instance because we need to use
+https with maven3. I added the following reverse proxy to ```/etc/apache2/sites-available``` on the ec2 ubuntu linux instance:
+```bash
+        ServerName jfrog.drspencer.io
+        ProxyPass / http://localhost:8082/
+        ProxyPassReverse / http://localhost:8082/
+```
+using Apache3.
+
+Now we have working artifactory instance on https://jfrog.drspencer.io:
+![image](https://user-images.githubusercontent.com/27693622/227302591-05513572-9618-4cfe-90c6-4f98fbb01d80.png)
