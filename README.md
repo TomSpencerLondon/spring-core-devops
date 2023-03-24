@@ -756,3 +756,5 @@ using Apache3.
 
 Now we have working artifactory instance on https://jfrog.drspencer.io:
 ![image](https://user-images.githubusercontent.com/27693622/227302591-05513572-9618-4cfe-90c6-4f98fbb01d80.png)
+
+curl -X PUT -d 'username:tom' -d 'password:APAMatmZmF1gkhpgP4ktE6rqNSR' http://localhost:8081/artifactory/libs-release-local/guru/springframework/spring-core-devops/0.0.1-SNAPSHOT/spring-core-devops-0.0.1-20230324.132602-1.jar
