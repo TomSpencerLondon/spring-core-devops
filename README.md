@@ -776,3 +776,25 @@ Uploaded to central: https://jfrog.drspencer.io/artifactory/libs-release-local/g
 
 ```
 
+We now see the release on our artifactory repository browser:
+<img width="506" alt="image" src="https://user-images.githubusercontent.com/27693622/227556194-db0dfd0e-b99a-4bc6-ac85-dce2191208af.png">
+
+### Jenkins with Artifactory
+We now set up Jenkins to look at the maven home directory to get changes uploaded to artifactory.
+We go to our operating system's home directory for jenkins:
+```bash
+/var/lib/jenkins
+```
+We first log into our ec2 instance and then change to jenkins user:
+```bash
+[ec2-user@ip-172-31-91-7 ~]$ sudo su -s /bin/bash jenkins
+bash-5.2$ 
+bash-5.2$ whoami
+jenkins
+```
+
+We then add the same configuration from our settings.xml to /var/lib/jenkins/settings.xml. Now we return to jenkins and add a build.
+
+
+
+
