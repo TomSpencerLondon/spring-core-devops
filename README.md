@@ -757,4 +757,22 @@ using Apache3.
 Now we have working artifactory instance on https://jfrog.drspencer.io:
 ![image](https://user-images.githubusercontent.com/27693622/227302591-05513572-9618-4cfe-90c6-4f98fbb01d80.png)
 
-curl -X PUT -d 'username:tom' -d 'password:APAMatmZmF1gkhpgP4ktE6rqNSR' http://localhost:8081/artifactory/libs-release-local/guru/springframework/spring-core-devops/0.0.1-SNAPSHOT/spring-core-devops-0.0.1-20230324.132602-1.jar
+We can now use the correct settings in our settings.xml to deploy the jar:
+```bash
+Uploading to central: https://jfrog.drspencer.io/artifactory/libs-release-local/guru/springframework/spring-core-devops/0.0.3/spring-core-devops-0.0.3.jar
+Uploaded to central: https://jfrog.drspencer.io/artifactory/libs-release-local/guru/springframework/spring-core-devops/0.0.3/spring-core-devops-0.0.3.jar (63 MB at 2.0 MB/s)
+Uploading to central: https://jfrog.drspencer.io/artifactory/libs-release-local/guru/springframework/spring-core-devops/0.0.3/spring-core-devops-0.0.3.pom
+Uploaded to central: https://jfrog.drspencer.io/artifactory/libs-release-local/guru/springframework/spring-core-devops/0.0.3/spring-core-devops-0.0.3.pom (3.9 kB at 6.2 kB/s)
+Downloading from central: https://jfrog.drspencer.io/artifactory/libs-release-local/guru/springframework/spring-core-devops/maven-metadata.xml
+Downloaded from central: https://jfrog.drspencer.io/artifactory/libs-release-local/guru/springframework/spring-core-devops/maven-metadata.xml (393 B at 1.5 kB/s)
+Uploading to central: https://jfrog.drspencer.io/artifactory/libs-release-local/guru/springframework/spring-core-devops/maven-metadata.xml
+Uploaded to central: https://jfrog.drspencer.io/artifactory/libs-release-local/guru/springframework/spring-core-devops/maven-metadata.xml (345 B at 559 B/s)
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  35.186 s
+[INFO] Finished at: 2023-03-24T14:02:35Z
+[INFO] ------------------------------------------------------------------------
+
+```
+

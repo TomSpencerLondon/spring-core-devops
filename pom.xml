@@ -138,5 +138,10 @@
 			<name>5c24e8023b39-releases</name>
 			<url>https://jfrog.drspencer.io/artifactory/libs-release-local</url>
 		</repository>
+		<snapshotRepository>
+			<id>snapshots</id>
+			<name>5c24e8023b39-snapshots</name>
+			<url>http://localhost:8081/artifactory/libs-snapshot</url>
+		</snapshotRepository>
 	</distributionManagement>
 </project>
