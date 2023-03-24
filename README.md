@@ -808,4 +808,30 @@ add mysql with the following command:
 ```bash
 sudo docker run -d --name mysql -p 3306:3306 -v /home/ec2-user/mysql_data:/var/lib/mysql -e MYSQL_ROOT_PASSWORD=password mysql:latest
 ```
+We can now check our running docker container and connect to mysql:
+```bash
+# check running instances
+sudo docker ps
+
+# connect to container
+sudo docker exec -it mysql bash
+
+# connect to MySQL
+mysql -p
+
+# create database
+CREATE DATABASE springguru;
+
+create user 'spring_guru_owner'@'localhost' identified with mysq_native_password by 'password';
+GRANT ALL PRIVILEGES ON springguru.* to 'spring_guru_owner'@'localhost';
+```
+Here we are connecting to mysql and creating the springguru database. We then create a new user account for interacting with the
+springguru database. This is not appropriate on a production database. In a major application the application would not be
+able to update the schema.
+
+
+
+
+
+
 
