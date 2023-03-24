@@ -800,3 +800,12 @@ We can now see that we are using our artifactory instance to download the requir
 Artifactory is important so that we can host the jars that we are building. It also works as read cache to save dependencies.
 Other tools on Artifactory such as Xray can help ensure that we are careful with open source software and have a history of what we
 are using. Xray checks dependencies for security issues.
+
+### Virtualised cloud deployment
+We will now set up a docker container for our mysql database. We will then deploy our application. 
+We will create a new ec2 instance and install docker with the same commands as before. We will then
+add mysql with the following command:
+```bash
+sudo docker run -d --name mysql -p 3306:3306 -v /home/ec2-user/mysql_data:/var/lib/mysql -e MYSQL_ROOT_PASSWORD=password mysql:latest
+```
+
