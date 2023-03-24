@@ -484,6 +484,7 @@ This sets up a proxy for the server and reverses traffic from 8080. We now do an
 ```bash
 [ec2-user@ip-172-31-63-3 conf]$ service httpd restart
 Redirecting to /bin/systemctl restart httpd.service
+
 Failed to restart httpd.service: Access denied
 See system logs and 'systemctl status httpd.service' for details.
 [ec2-user@ip-172-31-63-3 conf]$ sudo service httpd restart
