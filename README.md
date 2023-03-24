@@ -794,7 +794,9 @@ jenkins
 ```
 
 We then add the same configuration from our settings.xml to /var/lib/jenkins/settings.xml. Now we return to jenkins and add a build.
+We can now see that we are using our artifactory instance to download the required dependencies:
+<img width="1235" alt="image" src="https://user-images.githubusercontent.com/27693622/227561234-920779af-9a33-408b-9147-225e0a32e44e.png">
 
-
-
-
+Artifactory is important so that we can host the jars that we are building. It also works as read cache to save dependencies.
+Other tools on Artifactory such as Xray can help ensure that we are careful with open source software and have a history of what we
+are using. Xray checks dependencies for security issues.
