@@ -829,9 +829,117 @@ Here we are connecting to mysql and creating the springguru database. We then cr
 springguru database. This is not appropriate on a production database. In a major application the application would not be
 able to update the schema.
 
+### ec2 Docker application
+We can run the application in the command line with properties so it is better to run with a file that can be kept on the
+ec2 instance. We can set up a service with an external application.properties file on the operating system.
+We put an application.properties file the same directory as the jar.
+```bash
+[ec2-user@ip-172-31-83-176 ~]$ ls
+amazon-corretto-11-x64-linux-jdk.tar.gz  application.properties
+amazon-corretto-11.0.18.10.1-linux-x64   spring-core-devops-0.0.3.jar
+```
+These are the contents:
+```properties
+spring.datasource.url=jdbc:mysql://54.82.50.187:3306/springguru
+spring.datasource.username=spring_guru_owner
+spring.datasource.password=GuruPassword
+spring.jpa.hibernate.ddl-auto=update
 
+```
+If we wanted to add the same as environment variables we would do the following:
+```bash
+export SPRING_DATASOURCE_URL=jdbc:mysql://54.82.50.187:3306/springguru
+export SPRING_DATASOURCE_USERNAME=spring_guru_owner
+export SPRING_DATASOURCE_PASSWORD=GuruPassword
+```
+We would then run the application with:
+```bash
+java -jar ./spring-core-devops-0.0.3.jar
+```
+Instead we are going to run the application with systemd to ensure we keep environment variables each time.
 
+### Running Spring ec2 with persistent env
 
+We then add a service file on the spring boot ec2 instance:
+1. change to root and go to the system file on the linux instance
+```bash
+sudo su
+cd /etc/systemd/system
+```
+Save the following to spring.service:
+```bash
 
+[Unit]
+Description=Spring Boot Service
+After=syslog.target
+
+[Service]
+User=ec2-user
+# set di to location of application.properties and springboot jar
+WorkingDirectory=/home/ec2-user
+ExecStart=/usr/bin/java -jar spring-core-devops-0.0.3.jar
+SuccessExitStatus=143
+
+[Install]
+WantedBy=multi-user.target
+```
+The above is in /etc to run services. We run the jar as ec2-user and tell the application where java is
+and run the jar file.
+
+2. Reload service definitions: 
+```bash
+systemctl daemon-reload 
+```
+3. Add start on boot:
+```bash
+systemctl enable springboot.service
+```
+4. Start the application:
+```bash
+systemctl start springboot
+```
+
+We can now see the service is running:
+```bash
+[root@ip-172-31-83-176 system]# ps -ef | grep java
+ec2-user   29225       1 99 12:21 ?        00:00:12 /bin/java -jar spring-core-devops-0.0.3.jar
+root       29250   28901  0 12:21 pts/1    00:00:00 grep --color=auto java
+```
+
+In order to view the spring logs we can run the following:
+```bash
+tail -f /var/log/messages
+```
+
+If we want to remove services we can run the following:
+```bash
+
+systemctl stop spring
+systemctl disable spring
+rm /etc/systemd/system/spring
+rm /etc/systemd/system/spring # and symlinks that might be related
+rm /usr/lib/systemd/system/spring 
+rm /usr/lib/systemd/system/spring # and symlinks that might be related
+systemctl daemon-reload
+systemctl reset-failed
+```
+We can check the systemctl services running:
+```bash
+systemctl | grep spring
+```
+We can see the logs for the service:
+```bash
+journalctl -u service-name.service
+```
+You can also stop overrun for the logs with ```less```.
+You 
+
+We can see the application running at the public address for the ec2 instance (port 8080):
+![image](https://user-images.githubusercontent.com/27693622/227719004-83520eb4-97b8-4d52-aa8d-3cfb31e1e602.png)
+
+We can also view logs for a certain time frame:
+```bash
+journalctl -u springboot.service --since "2023-03-25 13:36:00" | less
+```
 
 
