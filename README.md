@@ -974,3 +974,16 @@ spring.datasource.password=password
 
 Our application is now running against the rds database locally.
 
+We now deploy our application using artifactory and then pull the new jar onto our ec2 instance.
+![image](https://user-images.githubusercontent.com/27693622/228001418-ebfd5241-3aa8-4438-84c0-a96ef80527b9.png)
+
+We can now pull the jar to our ec2 instance using wget:
+```bash
+sudo wget --user=tom --password=AKCp8nzqSiJFSBYhrCe4q14oDSSsJUH7dhivt4q2Y8ym8igR3fRxdJ3tGSnebXX68aq6CfvKM https://jfrog.drspencer.io/artifactory/libs-release-local/guru/springframework/spring-core-devops/0.0.4/spring-core-devops-0.0.4.jar
+```
+
+We then run the application jar:
+```bash
+java -jar spring-core-devops-0.0.4.jar
+```
+
