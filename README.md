@@ -1,5 +1,11 @@
 # Spring Framework DevOps on AWS
 
+This is an overview of how to use Spring with AWS. We will look at some of the tools we can use and also provision ec2 instances
+for each of the services. I have enjoyed creating this overview for you. The github for this repo is:
+https://github.com/TomSpencerLondon/spring-boot-docker
+
+Thanks again!
+
 ### Externalising Properties
 First we externalise properties to make our build portable.
 
@@ -986,4 +992,10 @@ We then run the application jar:
 ```bash
 java -jar spring-core-devops-0.0.4.jar
 ```
+
+Our application is now running on port 8080 on our ec2 instance:
+![image](https://user-images.githubusercontent.com/27693622/228028858-fc043fc2-32b8-42ae-b715-4183113abc76.png)
+
+I hope you find this intro to Spring with AWS helpful!
+
 
