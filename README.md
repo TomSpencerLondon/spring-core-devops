@@ -942,4 +942,35 @@ We can also view logs for a certain time frame:
 journalctl -u springboot.service --since "2023-03-25 13:36:00" | less
 ```
 
+### Amazon RDS
+
+We are now going to get our feet wet with Amazon RDS. We will use RDS to manage our mysql database.
+Amazon backs up the database, applies patches and allows us to offload the management of the database to Amazon.
+Amazon RDS allows us not to have to manage the database administration. AWS also helps us with security and patching.
+We will provision an Amazon database on RDS and then update our configuration for our application to use the RDS database.
+We will leverage the properties for the new database. Everything should work the same.
+
+#### Provision Mysql database on RDS
+We will start by provisioning a database on Amazon RDS.
+
+![image](https://user-images.githubusercontent.com/27693622/227983403-7d5e3e2f-7cac-4991-8af0-019cc3315407.png)
+
+This takes a while to set up the database:
+![image](https://user-images.githubusercontent.com/27693622/227985399-b48aff81-0b1a-444c-8bf3-fbd4208e4efb.png)
+
+We can now connect to the database using the following configuration:
+
+```properties
+
+guru.springframework.profile.message=This is mysql rds Profile
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQL8Dialect
+
+spring.datasource.url=jdbc:mysql://<YOUR MYSQL INSTANCE URL>:3306/springgurudb
+
+spring.jpa.hibernate.ddl-auto=update
+spring.datasource.username=spring
+spring.datasource.password=password
+```
+
+Our application is now running against the rds database locally.
 
